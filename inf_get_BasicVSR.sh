@@ -8,7 +8,6 @@ LR_folder=$5
 HR_folder=$6
 log=$7
 pyenv=$8
-vsrenv=$9
 
 conda activate ${pyenv}
 
@@ -21,15 +20,11 @@ done
 
 # Get BasicVSR++ inference data
 
-conda activate ${vsrenv}
-
 for i in $(seq $start $end);
 do
     python multiple_inference.py --img_dir ${inter}/Inter4K_frame/60fps/${LR_folder}_split/$i --out_dir ${inter}/Inter4K_frame/60fps/BasicVSRplusplus_VSRx4_${LR_folder}/$i
     echo $i
 done
-
-conda deactivate
 
 # Get BasicVSR++ inference results
 

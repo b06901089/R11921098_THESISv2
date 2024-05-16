@@ -104,7 +104,7 @@ def get_FSRCNN(p):
 
 def get_BasicVSR(p):
 
-    os.system('bash inf_get_BasicVSR.sh {} {} {} {} {} {} {} {} {}'.format(
+    os.system('bash inf_get_BasicVSR.sh {} {} {} {} {} {} {} {}'.format(
         p['source'], 
         p['start'], 
         p['end'], 
@@ -113,7 +113,6 @@ def get_BasicVSR(p):
         p['GT_res'],
         p['log_name'],
         p['pyenv'],
-        p['vsrenv'],
     ))
 
 def get_inference(p):
@@ -166,7 +165,69 @@ def Get_High_Quality(p):
     get_HQ(p)
     get_inference(p)
 
+def Inference(p):
+    tmp_crf = p['crf']
+    tmp_qp = p['qp']
+    tmp_res = p['res']
+    tmp_GT = p['GT_res']
 
+    # CRF
+    if p['crf'] != -1:
+
+        p['mode'] = 'Get Ground Truth'
+        p['res'] = tmp_GT
+        p['crf'] = 0
+        Get_Ground_Truth(p)
+
+        p['mode'] = 'Get Low Quality'
+        p['res'] = tmp_res
+        p['GT_res'] = tmp_GT
+        
+        for crf in tmp_crf:
+            p['crf'] = crf
+            Get_Low_Quality(p)
+
+        p['mode'] = 'Get High Quality'
+        p['res'] = tmp_GT
+
+        for crf in tmp_crf:
+            # CRF = 0 is ground truth
+            if crf != 0:
+                p['crf'] = crf
+                Get_High_Quality(p)
+
+    # CQP
+    elif p['qp'] != -1:
+
+        p['mode'] = 'Get Ground Truth'
+        p['res'] = tmp_GT
+        p['qp'] = 0
+        Get_Ground_Truth(p)
+
+        p['mode'] = 'Get Low Quality'
+        p['res'] = tmp_res
+        p['GT_res'] = tmp_GT
+        
+        for qp in tmp_qp:
+            p['qp'] = qp
+            Get_Low_Quality(p)
+
+        p['mode'] = 'Get High Quality'
+        p['res'] = tmp_GT
+
+        for qp in tmp_crf:
+            # CQP = 0 is ground truth
+            if qp != 0:
+                p['qp'] = qp
+                Get_High_Quality(p)
+
+
+    # Remove High-resolution and Low-resolution video and video frames
+    # (p.s. Data of video frames after SR are removed already)
+    os.system('rm -rf {}'.format(os.path.join(p['inter']), 'Inter4K_frame/60fps', tmp_res))
+    os.system('rm -rf {}'.format(os.path.join(p['inter']), 'Inter4K_frame/60fps', tmp_GT))
+    os.system('rm -rf {}'.format(os.path.join(p['inter']), 'Inter4K/60fps', tmp_res))
+    os.system('rm -rf {}'.format(os.path.join(p['inter']), 'Inter4K/60fps', tmp_GT))
 
 if __name__ == '__main__':
 
@@ -179,8 +240,14 @@ if __name__ == '__main__':
 
     pathlib.Path(p['log']).mkdir(parents=True, exist_ok=True)
     pathlib.Path('./My_output').mkdir(parents=True, exist_ok=True)
-    pathlib.Path(os.path.join(p['inter'], 'Inter_frame/60fps')).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(os.path.join(p['inter'], 'Inter4K_frame/60fps')).mkdir(parents=True, exist_ok=True)
 
+    # Log Naming
+    run_idx = 0
+    while os.path.isdir(os.path.join(p['log'], f'run{run_idx}')):
+        run_idx += 1
+    p['log'] = os.path.join(p['log'], f'run{run_idx}')
+    pathlib.Path(p['log']).mkdir(parents=True, exist_ok=True)
 
     if p['mode'] == 'Get Ground Truth':
         Get_Ground_Truth(p)
@@ -192,64 +259,7 @@ if __name__ == '__main__':
         Get_High_Quality(p)
 
     elif p['mode'] == 'Inference':
-        tmp_crf = p['crf']
-        tmp_qp = p['qp']
-        tmp_res = p['res']
-        tmp_GT = p['GT_res']
-
-        # Log Naming
-        run_idx = 0
-        while os.path.isdir(os.path.join(p['log'], f'run{run_idx}')):
-            run_idx += 1
-        p['log'] = os.path.join(p['log'], f'run{run_idx}')
-        pathlib.Path(p['log']).mkdir(parents=True, exist_ok=True)
-
-        # CRF
-        if p['crf'] != -1:
-
-            p['mode'] = 'Get Ground Truth'
-            p['res'] = tmp_GT
-            p['crf'] = 0
-            Get_Ground_Truth(p)
-
-            p['mode'] = 'Get Low Quality'
-            p['res'] = tmp_res
-            p['GT_res'] = tmp_GT
-            
-            for crf in tmp_crf:
-                p['crf'] = crf
-                Get_Low_Quality(p)
-
-            p['mode'] = 'Get High Quality'
-            p['res'] = tmp_GT
-
-            for crf in tmp_crf:
-                # CRF = 0 is ground truth
-                if crf != 0:
-                    p['crf'] = crf
-                    Get_High_Quality(p)
-
-        # CQP
-        elif p['qp'] != -1:
-
-            p['mode'] = 'Get Ground Truth'
-            p['res'] = tmp_GT
-            p['qp'] = 0
-            Get_Ground_Truth(p)
-
-            p['mode'] = 'Get Low Quality'
-            p['res'] = tmp_res
-            p['GT_res'] = tmp_GT
-            
-            for qp in tmp_qp:
-                p['qp'] = qp
-                Get_Low_Quality(p)
-
-            p['mode'] = 'Get High Quality'
-            p['res'] = tmp_GT
-
-            for qp in tmp_crf:
-                # CQP = 0 is ground truth
-                if qp != 0:
-                    p['qp'] = qp
-                    Get_High_Quality(p)
+        Inference(p)
+    
+    else:
+        print('Error: Config parameter \'mode\' incorrect!')

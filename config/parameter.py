@@ -17,22 +17,30 @@
 p = {
 
     'mode':     'Get Ground Truth',
-    # There are mainly three modes
+    # There are mainly four modes
+    #    'Get Ground Truth'
+    #        get uncompressed high-resolution video and video frames
+    #    'Get Low Quality'
+    #        get compressed high-resolution video and video frames
+    #    'Get High Quality'
+    #        get compressed low-resolution video and video frames
+    #    'Inference'
+    #        Combination of the previous three modes
     'log':      './My_log',
-    # Folder path to saved logs
+    # Path to saved the logs
     'source':   '/home/aaron/miniconda3/etc/profile.d/conda.sh',
-    # Path to conda.sh
+    # Path to source conda.sh
     'start':    1,
     # Start index of inference videos (1~1000)
     'end':      1,
     # End (include) index of inference videos (1~1000), End >= Start
     'crf':      0,
-    # Set CRF to 0~51, otherwise set to '-1' if you want to use CQP. Should be Set to 0 when getting ground truth. 
+    # Set CRF to 0~51, should be set to 0 when generating ground truth videos. Otherwise, set to '-1' if you want to use CQP.
     'qp':       -1,
-    # Set CQP to 0~51, otherwise set to '-1' if you want to use CRF. Should be Set to 0 when getting ground truth.
+    # Set CQP to 0~51, should be set to 0 when generating ground truth videos. Otherwise, set to '-1' if you want to use CRF.
     'inter':    '../../Datasets/Inter4K',
-    # Usage: Path to Root Inter4K folder
-    # The structure of the folder should look like this
+    # Path to Root Inter4K folder
+    # The structure of the folder should look like this:
     # Inter4K/
     #   Inter4K/
     #       60fps/
@@ -41,14 +49,13 @@ p = {
     # Ex: '../../Datasets/Inter4K'
     # Not: '../../Datasets/Inter4K/'
     'res':      '1080p',
-    # Usage: Target resolution, please refer to 'resolution_map' for more options
+    # Target resolution, please refer to 'resolution_map' for more options
     # 4K, 2K, 1080p, 720p, 540p, 360p, 270p, 180p
     'GT_res':   '',
+    # Resolution of ground truth
     # Not used in this mode
-    'pyenv':    'python3.8',
-    # Conda env name for YOLOv5 and FFmpeg
-    'vsrenv':   'basicvsr',
-    # Conda env name for BasicVSR++
+    'pyenv':    'vsr',
+    # Conda env name
 }
 
 # Get Low Quality
@@ -64,10 +71,9 @@ p = {
     'inter':    '../../Datasets/Inter4K',
     'res':      '270p',
     'GT_res':   '1080p',
-    # Resolution of ground truth, the resolution should be 4x of the low quality videos
-    # (i.e. 'GT_res' should equal to 'res' in 'Get Ground Truth')
-    'pyenv':    'python3.8',
-    'vsrenv':   'basicvsr',
+    # Resolution of ground truth
+    # (i.e. 'GT_res' should equal to 4x 'res')
+    'pyenv':    'vsr'
 }
 
 # Get High Quality
@@ -83,8 +89,9 @@ p = {
     'inter':    '../../Datasets/Inter4K',
     'res':      '1080p',
     'GT_res':   '1080p',
-    'pyenv':    'python3.8',
-    'vsrenv':   'basicvsr',
+    # Resolution of ground truth
+    # (i.e. 'GT_res' should equal to 'res')
+    'pyenv':    'vsr',
 }
 
 # Inference
@@ -97,12 +104,11 @@ p = {
     'start':    1,
     'end':      1,
     'crf':      [0,2,5,7,10,15,20,25,30,35,40],
-    # All the CRF value you want to run in a complete experiment
+    # All the CRF value you want to run in a complete experiment. Otherwise, set to '-1' if you want to use CQP.
     'qp':       -1,
-    # Or All the CQP value you want to run in a complete experiment
+    # All the CQP value you want to run in a complete experiment. Otherwise, set to '-1' if you want to use CRF.
     'inter':    '../../Datasets/Inter4K',
     'res':      '270p',
     'GT_res':   '1080p',
-    'pyenv':    'python3.8',
-    'vsrenv':   'basicvsr',
+    'pyenv':    'vsr',
 }
